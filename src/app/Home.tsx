@@ -1,12 +1,13 @@
 "use client"
 
 import React, { useState } from 'react';
-import { nanoBanana } from '../api/nanoBananaClient';
+import { photoRestoreAI } from '../api/photoRestoreAI';
 import { Download, ArrowRight, CheckCircle, Sparkles } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import UploadZone from '../components/upload/UploadZone';
 import ProcessingAnimation from '../components/restore/ProcessingAnimation';
 import BeforeAfterSlider from '../components/restore/BeforeAfterSlider';
+import AIStatusIndicator from '../components/AIStatusIndicator';
 
 interface HomeState {
   uploadedFile: File | null;
@@ -29,27 +30,18 @@ export default function Home() {
 
   const handleFileSelect = async (file: File) => {
     setState(prev => ({ ...prev, error: null, restoredUrl: null, uploadedFile: file }));
-
-    try {
-      const { file_url } = await nanoBanana.upload(file);
-      setState(prev => ({ ...prev, originalUrl: file_url }));
-    } catch (err) {
-      console.error('Upload error:', err);
-      const errorMessage = err instanceof Error 
-        ? `Erro no upload: ${err.message}` 
-        : 'Erro ao fazer upload. Verifique sua conexão e tente novamente.';
-      setState(prev => ({ ...prev, error: errorMessage }));
-    }
+    const originalUrl = URL.createObjectURL(file);
+    setState(prev => ({ ...prev, originalUrl }));
   };
 
   const handleRestore = async () => {
-    if (!state.originalUrl) return;
+    if (!state.uploadedFile) return;
 
     setState(prev => ({ ...prev, isProcessing: true, error: null }));
     const startTime = Date.now();
 
     try {
-      const result = await nanoBanana.restorePhoto(state.originalUrl);
+      const result = await photoRestoreAI.restorePhoto(state.uploadedFile);
       const timeInSeconds = (Date.now() - startTime) / 1000;
 
       if (result.restored_image_url) {
@@ -59,7 +51,9 @@ export default function Home() {
           processingTime: timeInSeconds 
         }));
 
-        await nanoBanana.saveRestoration({
+        // Opcional: salvar o resultado em algum lugar, se necessário
+        // Por exemplo, em um estado global ou fazer upload para um servidor
+        console.log('Restauração salva (simulado):', {
           original_url: state.originalUrl,
           restored_url: result.restored_image_url,
           status: 'completed',
@@ -112,6 +106,9 @@ export default function Home() {
 
   return (
     <div className="max-w-7xl mx-auto">
+      {/* Indicador de Status da IA */}
+      <AIStatusIndicator />
+
          {!state.originalUrl && !state.isProcessing && !state.restoredUrl && (
         <div className="text-center mb-12">
           <div className="clay-button bg-linear-to-r from-red-400 to-yellow-400 w-20 h-20 rounded-3xl mx-auto mb-6 flex items-center justify-center float-animation">
