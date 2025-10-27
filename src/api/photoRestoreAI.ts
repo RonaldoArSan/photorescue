@@ -9,12 +9,121 @@ interface RestoreImageResult {
 class PhotoRestoreAI {
   private genAI: GoogleGenerativeAI | null = null;
   private model: any = null;
+  private initialized = false;
+
+  private initialize() {
+    // Só inicializa no lado do cliente onde as variáveis NEXT_PUBLIC estão disponíveis
+    if (this.initialized || typeof window === 'undefined') return;
+    
+    // No lado do cliente, use NEXT_PUBLIC_ para acessar variáveis de ambiente
+    const apiKey = process.env.NEXT_PUBLIC_GOOGLE_GEMINI_API_KEY;
+    
+    console.log('🔑 Verificando configuração da API Key (cliente):', {
+      exists: !!apiKey,
+      length: apiKey ? apiKey.length : 0,
+      starts: apiKey ? apiKey.substring(0, 8) + '...' : 'N/A',
+      isClient: typeof window !== 'undefined'
+    });
+    
+    if (apiKey && apiKey !== 'your_google_gemini_api_key_here') {
+      try {
+        this.genAI = new GoogleGenerativeAI(apiKey);
+        // Usando o modelo correto do Gemini que suporta imagens
+        this.model = this.genAI.getGenerativeModel({ model: "gemini-1.5-pro" });
+        console.log('✅ Google Gemini AI configurado com sucesso (cliente)!');
+      } catch (error) {
+        console.error('❌ Erro ao configurar Google Gemini AI:', error);
+        console.warn('⚠️ Usando modo fallback automático devido ao erro de configuração.');
+      }
+    } else {
+      console.warn('⚠️ GOOGLE_GEMINI_API_KEY não encontrada ou não configurada. Usando modo fallback automático.');
+      console.log('🔍 Valores de debug (cliente):', {
+        NEXT_PUBLIC: process.env.NEXT_PUBLIC_GOOGLE_GEMINI_API_KEY,
+        isClient: typeof window !== 'undefined'
+      });
+    }
+    
+    this.initialized = true;
+  }
 
   constructor() {
-    const apiKey = process.env.GOOGLE_GEMINI_API_KEY;
-    if (apiKey) {
-      this.genAI = new GoogleGenerativeAI(apiKey);
-      this.model = this.genAI.getGenerativeModel({ model: "gemini-2.5-flash image" });
+    // No servidor, inicializa com variáveis do servidor
+    if (typeof window === 'undefined') {
+      const apiKey = process.env.GOOGLE_GEMINI_API_KEY;
+      
+      console.log('🔑 Verificando configuração da API Key (servidor):', {
+        exists: !!apiKey,
+        length: apiKey ? apiKey.length : 0,
+        starts: apiKey ? apiKey.substring(0, 8) + '...' : 'N/A',
+        isClient: false
+      });
+      
+      if (apiKey && apiKey !== 'your_google_gemini_api_key_here') {
+        try {
+          this.genAI = new GoogleGenerativeAI(apiKey);
+          this.model = this.genAI.getGenerativeModel({ model: "gemini-1.5-pro" });
+          console.log('✅ Google Gemini AI configurado com sucesso (servidor)!');
+          this.initialized = true;
+        } catch (error) {
+          console.error('❌ Erro ao configurar Google Gemini AI (servidor):', error);
+        }
+      }
+    }
+  }
+
+  // Verifica se a IA está configurada
+  isAIConfigured(): boolean {
+    // Se está no cliente e não foi inicializado, inicializa agora
+    if (typeof window !== 'undefined' && !this.initialized) {
+      this.initialize();
+    }
+    return this.model !== null;
+  }
+
+  // Retorna o status da configuração
+  getConfigurationStatus(): { configured: boolean; message: string } {
+    // Se está no cliente e não foi inicializado, inicializa agora
+    if (typeof window !== 'undefined' && !this.initialized) {
+      this.initialize();
+    }
+    
+    if (this.isAIConfigured()) {
+      return {
+        configured: true,
+        message: 'Google Gemini AI configurado e pronto para uso!'
+      };
+    }
+    
+    return {
+      configured: false,
+      message: 'Configure sua chave da API do Google Gemini para análise personalizada'
+    };
+  }
+
+  // Função de debug para testar a conexão com a IA
+  async testAIConnection(): Promise<{ success: boolean; message: string }> {
+    if (!this.model) {
+      return {
+        success: false,
+        message: 'IA não configurada. Configure a GOOGLE_GEMINI_API_KEY.'
+      };
+    }
+
+    try {
+      // Teste simples com texto
+      const result = await this.model.generateContent("Diga apenas 'OK' se você está funcionando.");
+      const response = await result.response;
+      const text = response.text();
+      
+      return {
+        success: true,
+        message: `IA funcionando corretamente. Resposta: ${text.trim()}`
+      };
+    } catch (error) {
+      return {
+        success: false,
+        message: `Erro ao testar IA: ${error instanceof Error ? error.message : String(error)}`
+      };
     }
   }
 
