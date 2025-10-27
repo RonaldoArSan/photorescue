@@ -8,7 +8,7 @@ interface RestoreImageResult {
 
 class PhotoRestoreAI {
   private genAI: GoogleGenerativeAI | null = null;
-  private model: any = null;
+  private model: ReturnType<GoogleGenerativeAI['getGenerativeModel']> | null = null;
   private initialized = false;
 
   private initialize() {
@@ -28,8 +28,8 @@ class PhotoRestoreAI {
     if (apiKey && apiKey !== 'your_google_gemini_api_key_here') {
       try {
         this.genAI = new GoogleGenerativeAI(apiKey);
-        // Usando o modelo correto do Gemini que suporta imagens
-        this.model = this.genAI.getGenerativeModel({ model: "gemini-2.5-flash-image" });
+        // Usando gemini-1.5-flash que é gratuito e suporta imagens
+        this.model = this.genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
         console.log('✅ Google Gemini AI configurado com sucesso (cliente)!');
       } catch (error) {
         console.error('❌ Erro ao configurar Google Gemini AI:', error);
@@ -61,7 +61,8 @@ class PhotoRestoreAI {
       if (apiKey && apiKey !== 'your_google_gemini_api_key_here') {
         try {
           this.genAI = new GoogleGenerativeAI(apiKey);
-          this.model = this.genAI.getGenerativeModel({ model: "gemini-1.5-pro" });
+          // Usando gemini-1.5-flash que é gratuito e suporta imagens
+          this.model = this.genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
           console.log('✅ Google Gemini AI configurado com sucesso (servidor)!');
           this.initialized = true;
         } catch (error) {
@@ -293,8 +294,6 @@ class PhotoRestoreAI {
     suggestions: string[]
   ): void {
     // Aplica filtros CSS via Canvas quando necessário
-    let filters: string[] = [];
-
     if (suggestions.some(s => s.toLowerCase().includes('nitidez') || 
                             s.toLowerCase().includes('sharpness'))) {
       // Simula unsharp mask através de sobreposição
@@ -421,8 +420,15 @@ class PhotoRestoreAI {
       }
     } catch (error) {
       console.error('Erro na análise da IA:', error);
-      return {
-        analysis: `Não foi possível analisar a imagem com IA. Aplicando melhorias padrão:
+      
+      // Verifica se é erro de quota
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      const isQuotaError = errorMessage.toLowerCase().includes('quota') || 
+                          errorMessage.toLowerCase().includes('resource_exhausted') ||
+                          errorMessage.toLowerCase().includes('rate limit');
+      
+      const analysisText = isQuotaError 
+        ? `⚠️ Limite da API Google Gemini atingido. Aplicando melhorias padrão:
         
         • Ajuste automático de brilho e exposição
         • Melhoria de contraste e definição 
@@ -430,7 +436,19 @@ class PhotoRestoreAI {
         • Redução de ruído e grão
         • Aprimoramento da nitidez geral
         
-        Para análise mais precisa, verifique a conexão com a API.`,
+        Dica: A API Gemini gratuita tem limites de uso. Aguarde alguns minutos ou considere upgrade do plano.`
+        : `Não foi possível analisar a imagem com IA. Aplicando melhorias padrão:
+        
+        • Ajuste automático de brilho e exposição
+        • Melhoria de contraste e definição 
+        • Aumento da saturação de cores
+        • Redução de ruído e grão
+        • Aprimoramento da nitidez geral
+        
+        Para análise mais precisa, verifique a conexão com a API.`;
+      
+      return {
+        analysis: analysisText,
         suggestions: [
           "brightness", "contrast", "saturação", "nitidez", 
           "ruído", "exposição", "definição", "cores"

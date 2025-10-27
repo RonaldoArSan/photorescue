@@ -18,6 +18,7 @@ Uma aplicação Next.js que restaura fotos antigas usando Inteligência Artifici
 - Tailwind CSS
 - React Query
 - Lucide Icons
+- Google Gemini AI (opcional)
 
 ## 📦 Instalação
 
@@ -46,55 +47,29 @@ npm run dev
 
 ## ⚙️ Configuração da API
 
-### Modo Demonstração (Padrão)
+### Google Gemini AI (Opcional)
 
-Por padrão, a aplicação roda em modo demonstração com dados mock. Isso permite testar todas as funcionalidades sem precisar configurar uma API real.
+Por padrão, a aplicação funciona com processamento local de imagens. Para análise avançada com IA, você pode configurar a API do Google Gemini:
 
-### API Real
+1. Obtenha uma chave API gratuita em: https://makersuite.google.com/app/apikey
 
-Para usar uma API real de restauração de fotos:
+2. Crie um arquivo `.env.local` na raiz do projeto:
+```bash
+cp .env.example .env.local
+```
 
-1. Configure a variável de ambiente no `.env.local`:
+3. Configure sua chave API no arquivo `.env.local`:
 ```env
-NEXT_PUBLIC_NANO_BANANA_API_URL=https://sua-api.com/v1
+NEXT_PUBLIC_GOOGLE_GEMINI_API_KEY=sua_chave_aqui
 ```
 
-2. Sua API deve implementar os seguintes endpoints:
+### Limites da API Gratuita
 
-- `POST /upload` - Upload de arquivo
-- `POST /restore` - Restauração da foto
-- `POST /restorations` - Salvar histórico
-- `GET /restorations` - Listar histórico
+- **Modelo usado**: gemini-1.5-flash (gratuito)
+- **Limite**: 15 requisições por minuto
+- **Nota**: Se o limite for excedido, a aplicação continuará funcionando com processamento local automático
 
-### Estrutura da API
-
-```typescript
-// Upload Response
-{
-  file_url: string
-}
-
-// Restore Request
-{
-  image_url: string
-}
-
-// Restore Response
-{
-  restored_image_url: string
-}
-
-// Restoration Object
-{
-  id?: string
-  original_url: string
-  restored_url?: string
-  status: 'processing' | 'completed' | 'failed'
-  original_filename?: string
-  processing_time?: number
-  created_date?: string
-}
-```
+Para limites maiores, considere upgrade para plano pago em: https://ai.google.dev/pricing
 
 ## 🏗️ Estrutura do Projeto
 
@@ -109,7 +84,8 @@ src/
 │   ├── page.tsx           # Página inicial
 │   └── Providers.tsx      # Providers (React Query)
 ├── api/                   # Cliente da API
-│   └── nanoBananaClient.ts
+│   ├── photoRestoreAI.ts # Cliente Google Gemini AI
+│   └── nanoBananaClient.ts # Cliente local storage
 ├── components/            # Componentes React
 │   ├── gallery/          # Componentes da galeria
 │   ├── restore/          # Componentes de restauração
