@@ -336,7 +336,6 @@ class PhotoRestoreAI {
       const base64 = await this.imageToBase64(file);
       
       const prompt = `
-        **Objetivo principal:**
         Restaure a imagem fornecida, removendo todas as imperfeições e aprimorando a qualidade geral para obter um resultado nítido e natural.
 
         **Instruções detalhadas de restauração:**
@@ -367,9 +366,7 @@ class PhotoRestoreAI {
         - Presença de ruído, grão ou poeira
         - Necessidade de colorização
         - Detalhes que precisam ser preservados ou restaurados
-
-        **Resposta esperada:**
-        Forneça uma análise técnica detalhada dos problemas identificados e as sugestões específicas de correção que devem ser aplicadas para restaurar esta fotografia ao seu estado ideal.
+   
 
         **Saída desejada:**
         A imagem restaurada deve parecer uma fotografia recente e profissionalmente editada, mantendo o estilo e a essência da foto original. O resultado deve ser ultra-realista e esteticamente agradável.

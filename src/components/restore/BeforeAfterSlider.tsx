@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { MoveHorizontal } from 'lucide-react';
+import { MoveHorizontal, ArrowLeft, ArrowRight } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 
 interface BeforeAfterSliderProps {
   beforeImage: string;
@@ -34,6 +35,19 @@ export default function BeforeAfterSlider({ beforeImage, afterImage }: BeforeAft
     handleMove(e.touches[0].clientX);
   };
 
+  // Funções para os botões Antes/Depois
+  const showBefore = () => {
+    setSliderPosition(0);
+  };
+
+  const showAfter = () => {
+    setSliderPosition(100);
+  };
+
+  const showSplit = () => {
+    setSliderPosition(50);
+  };
+
   useEffect(() => {
     if (isDragging) {
       document.addEventListener('mousemove', handleMouseMove);
@@ -51,10 +65,54 @@ export default function BeforeAfterSlider({ beforeImage, afterImage }: BeforeAft
   }, [isDragging, handleMouseMove]);
 
   return (
-    <div 
-      ref={containerRef}
-      className="clay-card relative rounded-3xl overflow-hidden aspect-4/3 bg-gray-100 select-none"
-    >
+    <div className="space-y-4">
+      {/* Botões de Controle */}
+      <div className="flex items-center justify-center gap-3">
+        <Button
+          onClick={showBefore}
+          variant="outline"
+          className={`clay-button px-6 py-3 rounded-2xl text-sm font-bold transition-all ${
+            sliderPosition === 0 
+              ? 'bg-linear-to-br from-blue-200 to-blue-300 text-blue-700 border-blue-300' 
+              : 'bg-white/80 hover:bg-white border-gray-200'
+          }`}
+        >
+          <ArrowLeft className="w-4 h-4 mr-2 inline" />
+          Ver Antes
+        </Button>
+        
+        <Button
+          onClick={showSplit}
+          variant="outline"
+          className={`clay-button px-6 py-3 rounded-2xl text-sm font-bold transition-all ${
+            sliderPosition === 50 
+              ? 'bg-linear-to-br from-purple-200 to-pink-200 text-purple-700 border-purple-300' 
+              : 'bg-white/80 hover:bg-white border-gray-200'
+          }`}
+        >
+          <MoveHorizontal className="w-4 h-4 mr-2 inline" />
+          Comparar
+        </Button>
+        
+        <Button
+          onClick={showAfter}
+          variant="outline"
+          className={`clay-button px-6 py-3 rounded-2xl text-sm font-bold transition-all ${
+            sliderPosition === 100 
+              ? 'bg-linear-to-br from-green-200 to-teal-200 text-green-700 border-green-300' 
+              : 'bg-white/80 hover:bg-white border-gray-200'
+          }`}
+        >
+          Ver Depois
+          <ArrowRight className="w-4 h-4 ml-2 inline" />
+        </Button>
+      </div>
+
+      {/* Slider Container */}
+      <div 
+        ref={containerRef}
+        className="clay-card relative rounded-3xl overflow-hidden aspect-4/3 bg-gray-100 select-none"
+      >
       {/* Before Image */}
       <div className="absolute inset-0 z-0">
         <img 
@@ -67,7 +125,7 @@ export default function BeforeAfterSlider({ beforeImage, afterImage }: BeforeAft
 
       {/* After Image with Clip */}
       <div 
-        className="absolute inset-0 z-0"
+        className="absolute inset-0 z-0 transition-all duration-300 ease-out"
         style={{ clipPath: `inset(0 ${100 - sliderPosition}% 0 0)` }}
       >
         <img 
@@ -91,7 +149,7 @@ export default function BeforeAfterSlider({ beforeImage, afterImage }: BeforeAft
 
       {/* Slider */}
       <div
-        className="absolute inset-y-0 cursor-ew-resize z-20"
+        className="absolute inset-y-0 cursor-ew-resize z-20 transition-all duration-300 ease-out"
         style={{ left: `${sliderPosition}%` }}
         onMouseDown={handleMouseDown}
         onTouchStart={handleMouseDown}
@@ -102,6 +160,7 @@ export default function BeforeAfterSlider({ beforeImage, afterImage }: BeforeAft
           <MoveHorizontal className="w-5 h-5 text-purple-600" />
         </div>
       </div>
+    </div>
     </div>
   );
 }
