@@ -44,57 +44,42 @@ npm run dev
 
 5. Abra [http://localhost:3000](http://localhost:3000) no seu navegador.
 
-## ⚙️ Configuração da API
+## ⚙️ Configuração da IA
 
-### Modo Demonstração (Padrão)
+### Google Gemini AI (Recomendado)
 
-Por padrão, a aplicação roda em modo demonstração com dados mock. Isso permite testar todas as funcionalidades sem precisar configurar uma API real.
+Esta aplicação utiliza **IA REAL** do Google Gemini para análise e restauração profissional de fotos:
 
-### API Real
+1. **Obtenha sua API Key:**
+   - Acesse: [https://ai.google.dev/](https://ai.google.dev/)
+   - Crie uma conta ou faça login
+   - Gere uma nova API key
 
-Para usar uma API real de restauração de fotos:
-
-1. Configure a variável de ambiente no `.env.local`:
+2. **Configure no projeto:**
 ```env
-NEXT_PUBLIC_NANO_BANANA_API_URL=https://sua-api.com/v1
+# .env.local
+GOOGLE_GEMINI_API_KEY=sua_chave_da_api_aqui
 ```
 
-2. Sua API deve implementar os seguintes endpoints:
+### Funcionalidades da IA
 
-- `POST /upload` - Upload de arquivo
-- `POST /restore` - Restauração da foto
-- `POST /restorations` - Salvar histórico
-- `GET /restorations` - Listar histórico
+**Com API Key configurada:**
+- ✅ Análise inteligente de cada imagem
+- ✅ Detecção precisa de problemas (arranhões, desbotamento, etc.)
+- ✅ Restauração personalizada baseada no conteúdo
+- ✅ Resultados profissionais e naturais
 
-### Estrutura da API
+**Sem API Key (Modo Automático):**
+- ⚠️ Análise automática básica
+- ⚠️ Filtros padrão de restauração
+- ⚠️ Funcionalidade limitada
 
-```typescript
-// Upload Response
-{
-  file_url: string
-}
+### Processo de Restauração
 
-// Restore Request
-{
-  image_url: string
-}
-
-// Restore Response
-{
-  restored_image_url: string
-}
-
-// Restoration Object
-{
-  id?: string
-  original_url: string
-  restored_url?: string
-  status: 'processing' | 'completed' | 'failed'
-  original_filename?: string
-  processing_time?: number
-  created_date?: string
-}
-```
+1. **Upload**: Imagem é processada localmente
+2. **Análise IA**: Google Gemini identifica problemas específicos
+3. **Restauração**: Aplicação de filtros personalizados baseados na análise
+4. **Resultado**: Imagem restaurada com qualidade profissional
 
 ## 🏗️ Estrutura do Projeto
 
