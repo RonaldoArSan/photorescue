@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button';
 import UploadZone from '../components/upload/UploadZone';
 import ProcessingAnimation from '../components/restore/ProcessingAnimation';
 import BeforeAfterSlider from '../components/restore/BeforeAfterSlider';
+import AIStatusIndicator from '../components/AIStatusIndicator';
 
 interface HomeState {
   uploadedFile: File | null;
@@ -112,7 +113,10 @@ export default function Home() {
 
   return (
     <div className="max-w-7xl mx-auto">
-         {!state.originalUrl && !state.isProcessing && !state.restoredUrl && (
+      {/* Indicador de Status da IA */}
+      <AIStatusIndicator />
+      
+      {!state.originalUrl && !state.isProcessing && !state.restoredUrl && (
         <div className="text-center mb-12">
           <div className="clay-button bg-linear-to-r from-red-400 to-yellow-400 w-20 h-20 rounded-3xl mx-auto mb-6 flex items-center justify-center float-animation">
             <Sparkles className="w-10 h-10 text-purple-700" />
