@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react';
 import { photoRestoreAI } from '../api/photoRestoreAI';
+import { nanoBanana } from '../api/nanoBananaClient';
 import { Download, ArrowRight, CheckCircle, Sparkles } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import UploadZone from '../components/upload/UploadZone';
@@ -51,15 +52,21 @@ export default function Home() {
           processingTime: timeInSeconds 
         }));
 
-        // Opcional: salvar o resultado em algum lugar, se necessário
-        // Por exemplo, em um estado global ou fazer upload para um servidor
-        console.log('Restauração salva (simulado):', {
-          original_url: state.originalUrl,
-          restored_url: result.restored_image_url,
-          status: 'completed',
-          original_filename: state.uploadedFile?.name,
-          processing_time: timeInSeconds
-        });
+        // Salva o resultado na galeria
+        try {
+          await nanoBanana.saveRestoration({
+            original_url: state.originalUrl!,
+            restored_url: result.restored_image_url,
+            status: 'completed',
+            original_filename: state.uploadedFile?.name,
+            processing_time: timeInSeconds,
+            analysis: result.analysis,
+            suggestions: result.suggestions
+          });
+        } catch (saveError) {
+          console.error('Erro ao salvar na galeria:', saveError);
+          // Não interrompe o fluxo se falhar ao salvar
+        }
       } else {
         throw new Error('Não foi possível restaurar a imagem');
       }
