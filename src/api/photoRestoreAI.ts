@@ -23,7 +23,7 @@ class PhotoRestoreAI {
     if (apiKey && apiKey !== 'your_google_gemini_api_key_here') {
       try {
         this.genAI = new GoogleGenerativeAI(apiKey);
-        this.model = this.genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+        this.model = this.genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
         console.log('✅ Google Gemini AI configurado com sucesso!');
       } catch (error) {
         console.error('❌ Erro ao configurar Google Gemini AI:', error);
