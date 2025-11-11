@@ -1,11 +1,8 @@
 "use client"
 
 import React, { useState } from 'react';
-import { nanoBanana } from '../../api/nanoBananaClient';
 import { useQuery } from '@tanstack/react-query';
 import { ImageOff, Sparkles } from 'lucide-react';
-import PhotoCard from '../../components/gallery/PhotoCard';
-import FullScreenModal from '../../components/gallery/FullScreenModal';
 import { Skeleton } from '@/components/ui/skeleton';
 import Link from 'next/link';
 import { PhotoRestoration } from '../../types';
