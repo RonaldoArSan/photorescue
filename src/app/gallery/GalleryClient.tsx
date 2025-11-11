@@ -1,7 +1,6 @@
 "use client"
 
 import React, { useState } from 'react';
-import { nanoBanana } from '../../api/nanoBananaClient';
 import { useQuery } from '@tanstack/react-query';
 import { ImageOff, Sparkles } from 'lucide-react';
 import PhotoCard from '../../components/gallery/PhotoCard';
@@ -13,9 +12,9 @@ import { PhotoRestoration } from '../../types';
 export default function GalleryClient() {
   const [selectedRestoration, setSelectedRestoration] = useState<PhotoRestoration | null>(null);
 
-  const { data: restorations, isLoading } = useQuery({
+  const { data: restorations, isLoading } = useQuery<PhotoRestoration[]>({
     queryKey: ['restorations'],
-    queryFn: () => nanoBanana.getRestorations(),
+    queryFn: () => Promise.resolve([]),
     initialData: [],
   });
 
@@ -66,9 +65,9 @@ export default function GalleryClient() {
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {restorations.map((restoration) => (
+          {restorations.map((restoration, index) => (
             <PhotoCard
-              key={restoration.id}
+              key={restoration.id || index}
               restoration={restoration}
               onClick={() => setSelectedRestoration(restoration)}
             />
